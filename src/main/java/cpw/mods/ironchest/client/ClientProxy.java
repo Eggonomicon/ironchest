@@ -10,32 +10,21 @@
  ******************************************************************************/
 package cpw.mods.ironchest.client;
 
-import net.minecraft.client.renderer.tileentity.TileEntityItemStackRenderer;
+import net.minecraft.client.renderer.tileentity.TileEntityRendererChestHelper;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.BlockPos;
 import net.minecraft.world.World;
-import net.minecraftforge.fml.client.FMLClientHandler;
-import net.minecraftforge.fml.client.registry.ClientRegistry;
+import cpw.mods.fml.client.FMLClientHandler;
+import cpw.mods.fml.client.registry.ClientRegistry;
 import cpw.mods.ironchest.CommonProxy;
-import cpw.mods.ironchest.IronChest;
 import cpw.mods.ironchest.IronChestType;
 import cpw.mods.ironchest.TileEntityIronChest;
 
-public class ClientProxy extends CommonProxy 
-{
+public class ClientProxy extends CommonProxy {
     @Override
     public void registerRenderInformation()
-    {        
-        for (IronChestType chestType : IronChestType.values())
-        {
-            if (chestType != IronChestType.WOOD)
-            {
-                ModelHelper.registerBlock(IronChest.ironChestBlock, chestType.ordinal(), "ironchest:BlockIronChest");
-            }
-        }
-
-        TileEntityItemStackRenderer.instance = new IronChestRenderHelper();
+    {
+        TileEntityRendererChestHelper.instance = new IronChestRenderHelper();
     }
 
     @Override
@@ -53,7 +42,7 @@ public class ClientProxy extends CommonProxy
     @Override
     public Object getClientGuiElement(int ID, EntityPlayer player, World world, int x, int y, int z)
     {
-        TileEntity te = world.getTileEntity(new BlockPos(x, y, z));
+        TileEntity te = world.getTileEntity(x, y, z);
         if (te != null && te instanceof TileEntityIronChest)
         {
             return GUIChest.GUI.buildGUI(IronChestType.values()[ID], player.inventory, (TileEntityIronChest) te);

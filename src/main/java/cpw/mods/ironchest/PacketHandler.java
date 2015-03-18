@@ -10,25 +10,23 @@
  ******************************************************************************/
 package cpw.mods.ironchest;
 
+import cpw.mods.fml.common.network.ByteBufUtils;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
-
 import java.util.EnumMap;
 
 import net.minecraft.item.ItemStack;
 import net.minecraft.network.Packet;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.BlockPos;
 import net.minecraft.world.World;
-import net.minecraftforge.fml.common.FMLCommonHandler;
-import net.minecraftforge.fml.common.network.ByteBufUtils;
-import net.minecraftforge.fml.common.network.FMLEmbeddedChannel;
-import net.minecraftforge.fml.common.network.FMLIndexedMessageToMessageCodec;
-import net.minecraftforge.fml.common.network.NetworkRegistry;
-import net.minecraftforge.fml.common.network.internal.FMLProxyPacket;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
+import cpw.mods.fml.common.FMLCommonHandler;
+import cpw.mods.fml.common.network.FMLEmbeddedChannel;
+import cpw.mods.fml.common.network.FMLIndexedMessageToMessageCodec;
+import cpw.mods.fml.common.network.NetworkRegistry;
+import cpw.mods.fml.common.network.internal.FMLProxyPacket;
+import cpw.mods.fml.relauncher.Side;
+import cpw.mods.fml.relauncher.SideOnly;
 
 /**
  * Handles the packet wrangling for IronChest
@@ -85,7 +83,7 @@ public enum PacketHandler {
         protected void channelRead0(ChannelHandlerContext ctx, IronChestMessage msg) throws Exception
         {
             World world = IronChest.proxy.getClientWorld();
-            TileEntity te = world.getTileEntity(new BlockPos(msg.x, msg.y, msg.z));
+            TileEntity te = world.getTileEntity(msg.x, msg.y, msg.z);
             if (te instanceof TileEntityIronChest)
             {
                 TileEntityIronChest icte = (TileEntityIronChest) te;
@@ -192,9 +190,9 @@ public enum PacketHandler {
     public static Packet getPacket(TileEntityIronChest tileEntityIronChest)
     {
         IronChestMessage msg = new IronChestMessage();
-        msg.x = tileEntityIronChest.getPos().getX();
-        msg.y = tileEntityIronChest.getPos().getY();
-        msg.z = tileEntityIronChest.getPos().getZ();
+        msg.x = tileEntityIronChest.xCoord;
+        msg.y = tileEntityIronChest.yCoord;
+        msg.z = tileEntityIronChest.zCoord;
         msg.type = tileEntityIronChest.getType().ordinal();
         msg.facing = tileEntityIronChest.getFacing();
         msg.itemStacks = tileEntityIronChest.buildItemStackDataList();

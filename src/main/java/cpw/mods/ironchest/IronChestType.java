@@ -13,19 +13,21 @@ package cpw.mods.ironchest;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-
+import net.minecraft.client.renderer.texture.IIconRegister;
 import net.minecraft.init.Blocks;
+import net.minecraft.init.Items;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.inventory.Slot;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagByte;
-import net.minecraft.util.IStringSerializable;
-import net.minecraftforge.fml.common.registry.GameRegistry;
+import net.minecraft.util.IIcon;
 import net.minecraftforge.oredict.ShapedOreRecipe;
+import cpw.mods.fml.common.registry.GameRegistry;
+import cpw.mods.fml.relauncher.Side;
+import cpw.mods.fml.relauncher.SideOnly;
 
-public enum IronChestType implements IStringSerializable
-{
+public enum IronChestType {
     IRON(54, 9, true, "Iron Chest", "ironchest.png", 0, Arrays.asList("ingotIron", "ingotRefinedIron"), TileEntityIronChest.class, "mmmmPmmmm", "mGmG3GmGm"),
     GOLD(81, 9, true, "Gold Chest", "goldchest.png", 1, Arrays.asList("ingotGold"), TileEntityGoldChest.class, "mmmmPmmmm", "mGmG4GmGm"),
     DIAMOND(108, 12, true, "Diamond Chest", "diamondchest.png", 2, Arrays.asList("gemDiamond"), TileEntityDiamondChest.class, "GGGmPmGGG", "GGGG4Gmmm"),
@@ -65,12 +67,6 @@ public enum IronChestType implements IStringSerializable
         this.recipes = recipes;
         this.matList = new ArrayList<String>();
         matList.addAll(mats);
-    }
-    
-    @Override
-    public String getName()
-    {
-        return name().toLowerCase();
     }
 
     public String getModelTexture()
@@ -115,7 +111,7 @@ public enum IronChestType implements IStringSerializable
         {
             generateRecipesForType(blockResult, previous, typ);
             ItemStack chest = new ItemStack(blockResult, 1, typ.ordinal());
-            //if (typ.isValidForCreativeMode()) GameRegistry.registerCustomItemStack(typ.friendlyName, chest);//TODO fix this!!
+            if (typ.isValidForCreativeMode()) GameRegistry.registerCustomItemStack(typ.friendlyName, chest);
             if (typ.tieredChest) previous = chest;
         }
     }
@@ -203,6 +199,33 @@ public enum IronChestType implements IStringSerializable
         return this == OBSIDIAN;
     }
 
+    @SideOnly(Side.CLIENT)
+    private IIcon[] icons;
+
+    @SideOnly(Side.CLIENT)
+    public void makeIcons(IIconRegister par1IconRegister)
+    {
+        if (isValidForCreativeMode())
+        {
+            icons = new IIcon[3];
+            int i = 0;
+            for (String s : sideNames)
+            {
+                icons[i++] = par1IconRegister.registerIcon(String.format("ironchest:%s_%s",name().toLowerCase(),s));
+            }
+        }
+    }
+
+    @SideOnly(Side.CLIENT)
+    public IIcon getIcon(int side)
+    {
+
+        return icons[sideMapping[side]];
+    }
+
+    private static String[] sideNames = { "top", "front", "side" };
+    private static int[] sideMapping = { 0, 0, 2, 1, 2, 2, 2 };
+
     public Slot makeSlot(IInventory chestInventory, int index, int x, int y)
     {
         return new ValidatingSlot(chestInventory, index, x, y, this);
@@ -212,7 +235,6 @@ public enum IronChestType implements IStringSerializable
     {
         return itemFilter == null || itemstack == null || itemstack.getItem() == itemFilter;
     }
-    
     public void adornItemDrop(ItemStack item)
     {
         if (this == DIRTCHEST9000)
